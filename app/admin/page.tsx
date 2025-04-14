@@ -1,16 +1,27 @@
-import { desc } from "drizzle-orm"
+import { desc, eq } from "drizzle-orm"
 
 import { db } from "@/database/db"
 import { todos } from "@/database/schema"
+import { isAdmin } from "@/lib/role-check"
 
 import { Button } from "@/components/ui/button"
 import { deleteTodo } from "@/actions/todos"
+import { auth } from "@/lib/auth"
+import { headers } from "next/headers"
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdminPage() {
-    
-    /* YOUR AUTHORIZATION CHECK HERE */
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session?.user) {
+        return null;
+    }
+
+    // Check if user is admin
+    const isUserAdmin = await isAdmin(session.user.id);
+    if (!isUserAdmin) {
+        return null;
+    }
 
     const allTodos = await db.query.todos.findMany({
         with: {
