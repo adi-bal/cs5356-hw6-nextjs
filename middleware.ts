@@ -1,26 +1,24 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { auth } from "@/lib/auth"
-import { isAdmin } from "@/lib/role-check"
 
 export async function middleware(request: NextRequest) {
-    const session = await auth.api.getSession({ headers: request.headers });
+    // Check for authentication cookie
+    const authCookie = request.cookies.get('better-auth-session');
+    const isAuthenticated = !!authCookie?.value;
 
     // Handle /todos route - redirect to sign in if not authenticated
     if (request.nextUrl.pathname === '/todos') {
-        if (!session?.user) {
+        if (!isAuthenticated) {
             return NextResponse.redirect(new URL('/auth/sign-in', request.url));
         }
     }
 
-    // Handle /admin route - redirect to home if not authenticated or not admin
+    // For /admin route, we can't check admin status in middleware
+    // since it requires database access which isn't Edge compatible
+    // We'll redirect to sign-in if not authenticated and let the admin
+    // page component handle the admin role check
     if (request.nextUrl.pathname === '/admin') {
-        if (!session?.user) {
+        if (!isAuthenticated) {
             return NextResponse.redirect(new URL('/auth/sign-in', request.url));
-        }
-
-        const isUserAdmin = await isAdmin(session.user.id);
-        if (!isUserAdmin) {
-            return NextResponse.redirect(new URL('/', request.url));
         }
     }
 
