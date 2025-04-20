@@ -1,9 +1,7 @@
 import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
-    experimental: {
-        nodeMiddleware: true,
-    },
+    // Configuration for production deployment
 }
 
 export default nextConfig
