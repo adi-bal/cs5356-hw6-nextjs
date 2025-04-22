@@ -1,9 +1,7 @@
 import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
-    experimental: {
-        nodeMiddleware: true,
-    },
+    // Remove experimental settings that might cause deployment issues
 }
 
 export default nextConfig
